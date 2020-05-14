@@ -3,7 +3,7 @@ const app = express()
 const mongoose = require('mongoose')
 const bodyParser = require('body-parser')
 
-mongoose.connect('mongodb://localhost:27017/test', { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect('mongodb://localhost:27017/proyecto', { useNewUrlParser: true, useUnifiedTopology: true })
 
 // Users
 const userModel = require('./users/userModel')(mongoose)
