@@ -1,15 +1,29 @@
-module.exports = (boardModel) => {
+module.exports = (boardModel, mongoose) => {
 
   class Board {
 
     /**
-     * Get Board list
+     * Get team list
      */
     async getList() {
       try {
-        // boardModel.find().populate('users')
-        let list = await boardModel.find()
+
+        let list = await boardModel.find().populate('users')
         return list
+      } catch (e) {
+        throw e
+      }
+    }
+
+    async getUserBoards(user) {
+      try {
+        let boardsIds = user.boards
+        // let objId = boardsIds.map(id => mongoose.Types.ObjectId(id))
+
+        let boards = await boardModel.find({id: {$in: boardsIds}})
+
+        
+        return boards
       } catch (e) {
         throw e
       }
@@ -24,11 +38,11 @@ module.exports = (boardModel) => {
       }
     }
 
-    async updateTitle(board) {
+    async updateName(board) {
       try {
-        let boardEntity = await boardModel.findById(board._id)
+        let boardEntity = await boardModel.findOne({id:board.id})
         if (boardEntity) {
-          boardEntity.name = team.name
+          boardEntity.name = board.name
           let doc = await boardEntity.save()
           return doc
         } else {
@@ -39,9 +53,25 @@ module.exports = (boardModel) => {
       }
     }
 
+    async updateLists(lists, boardId) {
+      try {
+        let boardEntity = await boardModel.findOne({id:boardId})
+        if (boardEntity) {
+          boardEntity.lists = [...boardEntity.lists, ...lists]
+          let doc = await boardEntity.save()
+          return doc
+        } else {
+          throw new Error('User not found')
+        }
+      }catch (e) {
+        throw e
+      }
+    }
+
     async delete(boardId) {
       try {
         let doc = await boardModel.findByIdAndDelete(boardId)
+
         return doc
       } catch (e) {
         throw e

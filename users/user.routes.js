@@ -1,8 +1,8 @@
-module.exports = (express, User) => {
+module.exports = (express, User, checkToken) => {
 
   let router = express.Router()
 
-  router.get('/', async (req, res, next) => {
+  router.get('/getAll', checkToken, async (req, res, next) => {
     try {
       let users = await User.getList()
       res.json(users)
@@ -11,7 +11,18 @@ module.exports = (express, User) => {
     }
   })
 
-  router.post('/', async (req, res, next) => {
+  router.get('/', checkToken, async (req, res, next) => {
+    try {
+      let user = await User.find(req.user.id)
+      res.json({user:user})
+    } catch(e) {
+      next(e)
+    }
+  })
+
+  
+
+  router.post('/', checkToken, async (req, res, next) => {
     try {
       let user = req.body.user
       let doc =  await User.create(user)
@@ -25,6 +36,15 @@ module.exports = (express, User) => {
     try {
       let user = req.body.user
       let doc =  await User.updateName(user)
+      res.json(doc)
+    } catch(e) {
+      next(e)
+    }
+  })
+  router.put('/updateBoards', checkToken, async (req, res, next) => {
+    try {
+      let boards = req.body.boards
+      let doc =  await User.updateBoards(boards, req.user)
       res.json(doc)
     } catch(e) {
       next(e)

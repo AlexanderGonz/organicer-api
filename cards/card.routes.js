@@ -1,4 +1,4 @@
-module.exports = (express, Card) => {
+module.exports = (express, Card, List, checkToken) => {
 
   let router = express.Router()
 
@@ -11,20 +11,34 @@ module.exports = (express, Card) => {
     }
   })
 
-  router.post('/', async (req, res, next) => {
+  router.post('/getUserCards', checkToken, async (req, res, next) => {
     try {
-      let card = req.body.card
-      let doc =  await Card.create(card)
-      res.json(doc)
+      
+      let cards = await Card.getUserCards(req.user, req.body.boardID)
+      
+      res.json({userCards:cards})
     } catch(e) {
       next(e)
     }
   })
 
-  router.put('/', async (req, res, next) => {
+  router.post('/addCard', async (req, res, next) => {
+    try {
+      let {card, listID } = req.body
+      let doc =  await Card.create(card)
+      let docList = await List.addCard(card, listID)
+      
+      
+      res.json([doc, docList])
+    } catch(e) {
+      next(e)
+    }
+  })
+
+  router.put('/editText', async (req, res, next) => {
     try {
       let card = req.body.card
-      let doc =  await Card.updateName(card)
+      let doc =  await Card.updateText(card)
       res.json(doc)
     } catch(e) {
       next(e)
