@@ -5,33 +5,39 @@ const bodyParser = require('body-parser')
 const jwt = require('jsonwebtoken')
 const config = require('./configs/config')
 const checkToken = require('./helpers/checkToken')
+const encripter = require('./helpers/encripter')
 const cors = require('cors')
+const nodemailer = require('nodemailer')
 
-mongoose.connect('mongodb://localhost:27017/proyecto', { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(config.database, { useNewUrlParser: true, useUnifiedTopology: true })
 
-// Users
-const userModel = require('./users/userModel')(mongoose)
-const User = require('./users/User')(userModel)
-const userRoutes = require('./users/user.routes')(express, User, checkToken)
+// Mailer
+const Mailer = require('./mailer/Mailer')(nodemailer)
 
-// Boards
-const boardModel = require('./boards/boardModel')(mongoose)
-const Board = require('./boards/Board')(boardModel, mongoose)
-const boardRoutes = require('./boards/board.routes')(express, Board, checkToken)
-
-// Lists
-const listModel = require('./lists/listModel')(mongoose)
-const List = require('./lists/List')(listModel, boardModel, mongoose)
-const listRoutes = require('./lists/list.routes')(express, List, checkToken)
-
-// Cards
+// Models
 const cardModel = require('./cards/cardModel')(mongoose)
-const Card = require('./cards/Card')(cardModel,boardModel,listModel, mongoose)
-const cardRoutes = require('./cards/card.routes')(express, Card, List, checkToken)
+const listModel = require('./lists/listModel')(mongoose)
+const boardModel = require('./boards/boardModel')(mongoose)
+const userModel = require('./users/userModel')(mongoose)
 
 //  Auth
-const Auth = require('./auth/Auth')(jwt, config.secretKey, userModel)
+const Auth = require('./auth/Auth')(jwt, config.secretKey, userModel, encripter)
 const authRoutes = require('./auth/auth.routes')(express, Auth)
+
+
+// Clases
+const Card = require('./cards/Card')(cardModel, mongoose)
+const List = require('./lists/List')(listModel, cardModel, Card, boardModel)
+const Board = require('./boards/Board')(boardModel, userModel, listModel, List, cardModel,  Card, mongoose)
+const User = require('./users/User')(userModel, boardModel, Board, listModel, List, cardModel, Card, Auth, Mailer, encripter)
+
+// Rutas
+const cardRoutes = require('./cards/card.routes')(express, Card, List, checkToken)
+const listRoutes = require('./lists/list.routes')(express, Card, List, Board, checkToken)
+const boardRoutes = require('./boards/board.routes')(express, Board, checkToken)
+const userRoutes = require('./users/user.routes')(express, User, checkToken)
+
+
 
 
 

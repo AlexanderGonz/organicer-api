@@ -20,6 +20,7 @@ module.exports = (req, res, next) => {
   let body = checkToken(token)
   
   
+  
   if (body.message == 'Token verified' && body.success) {
     req.user = body.user
     next()

@@ -1,6 +1,15 @@
 module.exports = (cardModel, boardModel, listModel, mongoose) => {
 
   class Card {
+    convertArrayToObject = (array, key) => {
+      const initialValue = {};
+      return array.reduce((obj, item) => {
+        return {
+          ...obj,
+          [item[key]]: item,
+        };
+      }, initialValue);
+    };
 
     /**
      * Get Board list
@@ -10,38 +19,6 @@ module.exports = (cardModel, boardModel, listModel, mongoose) => {
         // cardModel.find().populate('users')
         let list = await cardModel.find() // modelo.find({condiciones [boardid: 'asdad232']}, {select [id: 0, name: 1], {orden, limite [limit: 10, sort: 'name']})
         return list
-      } catch (e) {
-        throw e
-      }
-    }
-    
-    async getLists (listsIds) {
-      return await Promise.all(listsIds.map(async id => {
-         return await listModel.findOne({id:id})
-      }))
-    }
-
-    async getUserCards(user, boardID) {
-      try {
-        if(user.boards.includes(boardID)){
-          let boardEntity = await boardModel.findOne({id:boardID} )
-          
-          let listsIds = boardEntity.lists
-          let cardsIds = []
-          
-          let lists = await this.getLists(listsIds)
-          
-          lists.map(list => {
-            cardsIds = [...cardsIds, ...list.cards]
-          })
-          
-
-
-          // let objId = cardsIds.map(id => mongoose.Types.ObjectId(id))
-          let cards = cardModel.find({id: {$in: cardsIds}})
-          return cards
-        }
-
       } catch (e) {
         throw e
       }
@@ -58,7 +35,9 @@ module.exports = (cardModel, boardModel, listModel, mongoose) => {
 
     async updateText(card) {
       try {
-        let cardEntity = await cardModel.findOne({id:card.id})
+        let cardEntity = await cardModel.findById(card._id)
+        console.log(card._id);
+        
         if (cardEntity) {
           cardEntity.text = card.text
           let doc = await cardEntity.save()
@@ -71,9 +50,9 @@ module.exports = (cardModel, boardModel, listModel, mongoose) => {
       }
     }
 
-    async delete(cardId) {
+    async delete(cardID) {
       try {
-        let doc = await cardModel.deleteOne({id:cardId})
+        let doc = await cardModel.findByIdAndDelete(cardID)
         return doc
       } catch (e) {
         throw e

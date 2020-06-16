@@ -1,15 +1,23 @@
-Card = require("../cards/Card")
 
-module.exports = (listModel,boardModel, mongoose) => {
+module.exports = (listModel, cardModel, Card, boardModel) => {
   
   class List {
+    convertArrayToObject = (array, key) => {
+      const initialValue = {};
+      return array.reduce((obj, item) => {
+        return {
+          ...obj,
+          [item[key]]: item,
+        };
+      }, initialValue);
+    };
 
     /**
      * Get Lits list
      */
     async getList() {
       try {
-        // listModel.find().populate('users')
+
         let list = await listModel.find()
         return list
       } catch (e) {
@@ -24,8 +32,9 @@ module.exports = (listModel,boardModel, mongoose) => {
           
           let listsIds = boardEntity.lists
           // let objId = listsIds.map(id => mongoose.Types.ObjectId(id))
-          let lists = listModel.find({id: {$in: listsIds}})
-          return lists
+          let lists = await listModel.find({id: {$in: listsIds}})
+
+          return this.convertArrayToObject(lists, 'id')
         }
 
       } catch (e) {
@@ -44,9 +53,9 @@ module.exports = (listModel,boardModel, mongoose) => {
 
     async updateTitle(list) {
       try {
-        let listEntity = await listModel.findOne({id:list.id})
+        let listEntity = await listModel.findById(list._id)
         if (listEntity) {
-          listEntity.name = list.name
+          listEntity.title = list.title
           let doc = await listEntity.save()
           return doc
         } else {
@@ -57,27 +66,87 @@ module.exports = (listModel,boardModel, mongoose) => {
       }
     }
 
-    async addCard(card, listId) {
+    async dragCard(droppableIdStart, droppableIdEnd, droppableIndexStart, droppableIndexEnd,draggableId, boardID){
+      try{
+        // Misma lista
+        if (droppableIdStart === droppableIdEnd) {
+          let listEntity = await listModel.findById(droppableIdStart)
+
+          if(listEntity){
+            // Quitamos la card del la list
+            let card = listEntity.cards.splice(droppableIndexStart, 1)
+            // Agregamos la card en la nueva posicion
+            listEntity.cards.splice(droppableIndexEnd, 0, ...card)
+            let doc = await listEntity.save()
+            return doc
+          }else{
+            throw new Error('List not Found')
+          }  
+
+        } else{
+          // Otra lista
+          // cogemos la lista de origen
+          let listStart = await listModel.findById(droppableIdStart)
+          // Quitamos la card de la lista
+          let card = listStart.cards.splice(droppableIndexStart, 1)
+          // Cogemos la lista destino
+          let listEnd = await listModel.findById(droppableIdEnd)
+  
+          // Agregamos la card a la lista origen en la posicion indicada
+          listEnd.cards.splice(droppableIndexEnd, 0, ...card);
+          let docStart = await listStart.save()
+          let docEnd = await listEnd.save()
+
+          return {docStart, docEnd}
+        }
+
+      } catch(e){
+        throw e
+      } 
+    }
+
+    async addCard(card, listID) {
       try {
-        let listEntity = await listModel.findOne({id:listId})
-        if (listEntity) {
-          listEntity.cards = [...listEntity.cards, card.id]
+        let cardEntity = await Card.create(card)
+        let listEntity = await listModel.findById(listID)
+
+        if(cardEntity && listEntity){
+          listEntity.cards = [...listEntity.cards, cardEntity._id]
           let doc = await listEntity.save()
-          return doc
+          // devuelvo cardEntity porque me interesa coger su _id para el front
+          return cardEntity
+
         } else {
-          // let doc = await Card.delete(card.id)
-          throw new Error('List not found')
+          let msg
+          if(cardEntity){
+            msg = 'List not Found'
+            Card.delete(cardEntity._id)
+          }else {
+            msg = 'Card create Error'
+          }
+          throw new Error (msg)
         }
       }catch (e) {
         throw e
       }
     }
 
-    async delete(listId) {
+
+    async deleteCard(cardID, listID) {
       try {
-        let doc = await listModel.findByIdAndDelete(listId)
-        return doc
-      } catch (e) {
+        let cardEntity =  await Card.delete(cardID)
+        let listEntity = await listModel.findById(listID)
+
+        if (cardEntity && listEntity) {
+          listEntity.cards = listEntity.cards.filter(card => card != cardID)
+          let doc = await listEntity.save()
+
+          return doc
+        } else {
+          let msg = cardEntity ? 'List not Found' : 'Card not Found'
+          throw new Error(msg)
+        }
+      }catch (e) {
         throw e
       }
     }

@@ -1,4 +1,4 @@
-module.exports = (express, List, checkToken) => {
+module.exports = (express, Card, List, Board, checkToken) => {
 
   let router = express.Router()
 
@@ -22,20 +22,32 @@ module.exports = (express, List, checkToken) => {
     }
   })
 
-  router.post('/', async (req, res, next) => {
+  router.post('/addCard', checkToken, async (req, res, next) => {
     try {
-      let list = req.body.list
-      let doc =  await List.create(list)
+      let {card, listID } = req.body
+      let doc = await List.addCard(card, listID)
+      
       res.json(doc)
     } catch(e) {
       next(e)
     }
   })
 
-  router.put('/', async (req, res, next) => {
+  router.post('/dragCard', checkToken, async (req, res, next) => {
+    try{
+      let { droppableIdStart, droppableIdEnd, droppableIndexStart, droppableIndexEnd,draggableId, boardID } = req.body
+      let doc = await List.dragCard(droppableIdStart, droppableIdEnd, droppableIndexStart, droppableIndexEnd,draggableId, boardID)
+
+      res.json(doc)
+    }catch(e){
+      next(e)
+    }
+  })
+
+  router.put('/editTitle', checkToken,  async (req, res, next) => {
     try {
       let list = req.body.list
-      let doc =  await List.updateName(list)
+      let doc =  await List.updateTitle(list)
       res.json(doc)
     } catch(e) {
       next(e)
@@ -52,11 +64,13 @@ module.exports = (express, List, checkToken) => {
     }
   })
 
-  router.delete('/', async (req, res, next) => {
+
+  router.delete('/deleteCard', checkToken, async (req, res, next) => {
     try {
-      let listId = req.body.listId
-      let doc =  await List.delete(listId)
-      res.json(doc)
+      let { cardID, listID } = req.body
+      
+      let doc = await List.deleteCard(cardID, listID)
+      res.json(doc )
     } catch(e) {
       next(e)
     }

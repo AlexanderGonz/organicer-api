@@ -20,33 +20,73 @@ module.exports = (express, User, checkToken) => {
     }
   })
 
+  router.post('/getUsersCompany', checkToken, async (req, res, next) => {
+    try{
+      let doc = await User.getUsersCompany(req.user, req.body.boardID)
+      res.json(doc)
+    }catch (e){
+      throw e
+    }
+  })
+
   
 
   router.post('/', checkToken, async (req, res, next) => {
     try {
-      let user = req.body.user
-      let doc =  await User.create(user)
+      let newUser = req.body.newUser
+      let doc =  await User.create(req.user, newUser)
       res.json(doc)
     } catch(e) {
       next(e)
     }
   })
 
-  router.put('/', async (req, res, next) => {
+  router.post('/activate', async (req, res, next) => {
     try {
-      let user = req.body.user
-      let doc =  await User.updateName(user)
+      let response = await User.activateUser(req.body.id)
+      res.json(response)
+    } catch (e) {
+      next(e)
+    }
+  })
+
+  router.post('/addBoard', checkToken, async (req, res, next) => {
+    try {
+      let { board } = req.body
+      let doc = await User.addBoard(req.user, board)
+      
       res.json(doc)
     } catch(e) {
       next(e)
     }
   })
+
+  router.put('/', checkToken, async (req, res, next) => {
+    try {
+      let user = req.body.user
+      let doc =  await User.updateUser(req.user, user)
+      res.json(doc)
+    } catch(e) {
+      next(e)
+    }
+  })
+
   router.put('/updateBoards', checkToken, async (req, res, next) => {
     try {
       let boards = req.body.boards
       let doc =  await User.updateBoards(boards, req.user)
       res.json(doc)
     } catch(e) {
+      next(e)
+    }
+  })
+
+  router.put('/removeFromBoard', checkToken, async (req, res, next) => {
+    try{
+      let { userID, boardID} = req.body
+      let doc = await User.removeFromBoard(req.user, userID, boardID)
+      res.json(doc)
+    }catch (e){
       next(e)
     }
   })
