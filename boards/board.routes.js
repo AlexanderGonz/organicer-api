@@ -2,7 +2,7 @@ module.exports = (express, Board, checkToken) => {
 
   let router = express.Router()
 
-  router.get('/', async (req, res, next) => {
+  router.get('/', checkToken, async (req, res, next) => {
     try {
       let boards = await Board.getList()
       res.json(boards)
