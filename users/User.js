@@ -1,6 +1,6 @@
 const { response } = require("express");
 
-module.exports = (userModel, boardModel, Board, listModel, List, cardModel, Card, Auth, Mailer, encripter) => {
+module.exports = (userModel, boardModel, Board, listModel, List, cardModel, Card, Auth, config, Mailer, encripter) => {
 
   class User {
     convertArrayToObject = (array, key) => {
@@ -38,7 +38,7 @@ module.exports = (userModel, boardModel, Board, listModel, List, cardModel, Card
               Para empezar a utilizar tu cuenta, deberá hacer click en el siguiente enlace de activación:
             </p>
             <p>
-              <a href="http://localhost:3000/activate/${doc._id}"><strong>Activar cuenta</strong></a>
+              <a href="${config.clientUrl}/activate/${doc._id}"><strong>Activar cuenta</strong></a>
             </p>
           `
           await Mailer.sendMail(doc.email, 'OrgaNicer - Activación de cuenta', body)

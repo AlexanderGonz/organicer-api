@@ -30,7 +30,7 @@ const authRoutes = require('./auth/auth.routes')(express, Auth)
 const Card = require('./cards/Card')(cardModel, mongoose)
 const List = require('./lists/List')(listModel, cardModel, Card, boardModel)
 const Board = require('./boards/Board')(boardModel, userModel, listModel, List, cardModel,  Card, mongoose)
-const User = require('./users/User')(userModel, boardModel, Board, listModel, List, cardModel, Card, Auth, Mailer, encripter)
+const User = require('./users/User')(userModel, boardModel, Board, listModel, List, cardModel, Card, Auth, config, Mailer, encripter)
 
 // Rutas
 const cardRoutes = require('./cards/card.routes')(express, Card, List, checkToken)
