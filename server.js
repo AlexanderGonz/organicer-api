@@ -56,6 +56,6 @@ app.use('/auth', authRoutes)
 // fichero de gestión de errores
 //app.use(errorHandle)
 
-app.listen(4000, () => {
+app.listen(config.port, () => {
   console.log('Escuchando peticiones en el puerto 4000')
 })
