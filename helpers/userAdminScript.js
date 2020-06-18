@@ -9,13 +9,12 @@ mongoose.connect(config.database, { useNewUrlParser: true })
 
 console.log('[1/3] Creating User...')
 let testUser = new User({
-  name: 'Maria',
-  lastname: 'Nrihuega',
-  email: 'maria@gmail.com',
-  password: encripter('test'),
-
+  name: 'Alexander',
+  lastname: 'González Ponce',
+  email: 'erickalexander12@gmail.com',
+  password: encripter('Internet12'),
   rol: 'admin',
-  company: 'arcipreste',
+  company: 'Riders of memes',
   active: true,
 })
 testUser.save().then((userEntity) => {
