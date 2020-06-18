@@ -4,7 +4,7 @@ module.exports = (nodemailer) => {
     constructor() {
       this.from = 'organicermailer@gmail.com'
       this.password = 'organicer1234'
-      this.test = true
+      this.test = false
       this.testEmail = 'erickalexander12@gmail.com'
     }
 
