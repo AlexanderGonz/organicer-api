@@ -44,7 +44,7 @@ const userRoutes = require('./users/user.routes')(express, User, checkToken)
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true}))
 app.use(bodyParser.json())
-app.use(cors())
+app.options('*', cors())
 
 // "Controllers" 
 app.use('/users', userRoutes)
