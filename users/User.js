@@ -38,7 +38,7 @@ module.exports = (userModel, boardModel, Board, listModel, List, cardModel, Card
               Para empezar a utilizar tu cuenta, deberá hacer click en el siguiente enlace de activación:
             </p>
             <p>
-              <a href={organicer.herokuapp.com/activate/${doc._id}" ><strong>Activar cuenta</strong></a>
+              <a href="organicer.herokuapp.com/activate/${doc._id}" ><strong>Activar cuenta</strong></a>
             </p>
           `
           await Mailer.sendMail(doc.email, 'OrgaNicer - Activación de cuenta', body)
