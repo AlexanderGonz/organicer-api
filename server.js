@@ -8,6 +8,7 @@ const checkToken = require('./helpers/checkToken')
 const encripter = require('./helpers/encripter')
 const cors = require('cors')
 const nodemailer = require('nodemailer')
+console.log('database', config.database);
 
 mongoose.connect(config.database, { useNewUrlParser: true, useUnifiedTopology: true })
 
